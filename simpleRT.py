@@ -14,9 +14,10 @@ def main():
 
     api = tweepy.API(auth)
 
-    response = api.retweets(509457288717819904, 100)
-    response_to_json = convert_to_json(response)
-    write_to_file(response_to_json)
+    retweeters = api.retweets(509457288717819904, 100)
+    retweeters = convert_to_json(retweeters)
+    retweeters_info = get_retweeters_info(retweeters)
+    write_to_file(retweeters_info)
 
 def convert_to_json(retweets):
     result = []
@@ -28,6 +29,20 @@ def convert_to_json(retweets):
 
 def write_to_file(json_data):
     with open('data.json', 'w') as outfile:
-        json.dump(json_data, outfile)
+        json.dump(json_data, outfile, indent=4, sort_keys=True)
+
+def get_retweeters_info(retweeters):
+    retweeters_info = []
+    for retweeter in retweeters:
+        retweeters_info.append(retweeter['user'])
+    return retweeters_info
+
+
+"""
+ TODO:
+    -> Connect pymysql 
+    -> Create a database and a schema to structure the information you need in tables and rows to be saved
+    -> send the information to pymysql
+"""
 
 main()
