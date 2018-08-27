@@ -17,7 +17,8 @@ def main():
     retweeters = api.retweets(509457288717819904, 100)
     retweeters = convert_to_json(retweeters)
     retweeters_info = get_retweeters_info(retweeters)
-    write_to_file(retweeters_info)
+    retweeters_users = get_users_by_id(api, retweeters_info)
+    write_to_file(retweeters_users)
 
 def convert_to_json(retweets):
     result = []
@@ -36,6 +37,14 @@ def get_retweeters_info(retweeters):
     for retweeter in retweeters:
         retweeters_info.append(retweeter['user'])
     return retweeters_info
+
+def get_users_by_id(api, users):
+    result = []
+    for user in users:
+        userObj = api.get_user(user['id'])
+        if type(userObj) is tweepy.models.User:
+            result.append(userObj._json)
+    return result
 
 
 """
