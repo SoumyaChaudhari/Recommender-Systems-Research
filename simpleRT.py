@@ -1,9 +1,15 @@
 
 import  tweepy
 import json
+import pymysql
 #TextBlob iteself gives you the sentiment polarity from -1 to 1 with -1 being negative, 0 is neutral and 1 being positive
 
 def main():
+    # Open database connection
+    connection = pymysql.connect(host = 'localhost',user = 'Soumya',passwd ='password',db ='sampledb')
+    # prepare a cursor object using cursor() method
+    cursor = connection.cursor()
+    # execute SQL query using execute() method.
     consumer_key = 'xsaoUwHoyqgkU4mWNl42UxzL4'
     consumer_secret = 'ckUYqvErRcZoRZQNqNlW5WrvTnrrQ57n1MAzWxyaSM0kRHxJ5w'
     access_token = '2954792182-HPM3ilDe9kaYHDWsh5a54mImcwe0VcXz8p4Vp7c'
@@ -16,7 +22,32 @@ def main():
 
     retweeters = api.retweets(509457288717819904, 100)
     retweeters = convert_to_json(retweeters)
-    write_to_file(retweeters)
+    filtered_users = []
+    for retweet in retweeters:
+        if retweet['user']['location'] != '': 
+            filtered_users.append(retweet)
+    arrays_of_ids = []
+    arrays_of_location = []
+    arrays_of_friends = []
+    arrays_of_name = []
+    for user in filtered_users:
+        arrays_of_ids.append(user['user']['id'])
+        arrays_of_location.append(user['user']['location'])
+        arrays_of_friends.append(user['user']['friends_count'])
+        arrays_of_name.append(user['user']['name'])
+        print('-----------')
+        print(user['user']['id'])
+        print(user['user']['location'])
+        print(user['user']['friends_count'])
+        print('-----------')
+    for i in range(len(arrays_of_ids)):
+        sql = ("INSERT INTO rtInfo(id,name,location,friendsCount) VALUES('%d','%s','%s','%d')" % (arrays_of_ids[i],arrays_of_name[i],arrays_of_location[i],arrays_of_friends[i]))
+        cursor.execute(sql)
+        connection.commit()
+        # Fetch a single row using fetchone() method.
+    data = cursor.fetchall()
+
+    write_to_file(filtered_users)
 
 def convert_to_json(retweets):
     result = []
