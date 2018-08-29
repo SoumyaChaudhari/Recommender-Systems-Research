@@ -6,7 +6,7 @@ import pymysql
 
 def main():
     # Open database connection
-    connection = pymysql.connect(host = 'localhost',user = 'Soumya',passwd ='password',db ='sampledb')
+    connection = pymysql.connect(host = 'localhost',user = 'Soumya',passwd ='passwd',db ='retweets')
     # prepare a cursor object using cursor() method
     cursor = connection.cursor()
     # execute SQL query using execute() method.
@@ -32,16 +32,17 @@ def main():
     arrays_of_name = []
     for user in filtered_users:
         arrays_of_ids.append(user['user']['id'])
+        arrays_of_name.append(user['user']['name'])
         arrays_of_location.append(user['user']['location'])
         arrays_of_friends.append(user['user']['friends_count'])
-        arrays_of_name.append(user['user']['name'])
         print('-----------')
         print(user['user']['id'])
+        print(user['user']['name'])
         print(user['user']['location'])
         print(user['user']['friends_count'])
         print('-----------')
     for i in range(len(arrays_of_ids)):
-        sql = ("INSERT INTO rtInfo(id,name,location,friendsCount) VALUES('%d','%s','%s','%d')" % (arrays_of_ids[i],arrays_of_name[i],arrays_of_location[i],arrays_of_friends[i]))
+        sql = ("INSERT INTO rt_info(id,name,location,friendsCount) VALUES('%d','%s','%s','%d')" % (arrays_of_ids[i],arrays_of_name[i],arrays_of_location[i],arrays_of_friends[i]))
         cursor.execute(sql)
         connection.commit()
         # Fetch a single row using fetchone() method.
@@ -52,7 +53,7 @@ def main():
 def convert_to_json(retweets):
     result = []
     for retweet in retweets:
-        if type(retweet) is tweepy.models.Status:
+        if type(retweet) is tweepy.models.Status: #Specify the class to append to the array
             result.append(retweet._json)
     return result
 
