@@ -1,14 +1,14 @@
 
 import  tweepy
 import json
-import pymysql
+# import pymysql
 #TextBlob iteself gives you the sentiment polarity from -1 to 1 with -1 being negative, 0 is neutral and 1 being positive
 
 def main():
     # Open database connection
-    connection = pymysql.connect(host = 'localhost',user = 'Soumya',passwd ='passwd',db ='retweets')
+    # connection = pymysql.connect(host = 'localhost',user = 'Soumya',passwd ='passwd',db ='retweets')
     # prepare a cursor object using cursor() method
-    cursor = connection.cursor()
+    # cursor = connection.cursor()
     # execute SQL query using execute() method.
     consumer_key = 'xsaoUwHoyqgkU4mWNl42UxzL4'
     consumer_secret = 'ckUYqvErRcZoRZQNqNlW5WrvTnrrQ57n1MAzWxyaSM0kRHxJ5w'
@@ -26,6 +26,12 @@ def main():
     for retweet in retweeters:
         if retweet['user']['location'] != '': 
             filtered_users.append(retweet)
+    # pop_table(filtered_users)
+    users_info = get_user_id(api, filtered_users)
+    retweet_stat = retweet_status(api, users_info)
+    write_to_file(retweet_stat)
+
+def pop_table(filtered_users):
     arrays_of_ids = []
     arrays_of_location = []
     arrays_of_friends = []
@@ -35,20 +41,36 @@ def main():
         arrays_of_name.append(user['user']['name'])
         arrays_of_location.append(user['user']['location'])
         arrays_of_friends.append(user['user']['friends_count'])
-        print('-----------')
-        print(user['user']['id'])
-        print(user['user']['name'])
-        print(user['user']['location'])
-        print(user['user']['friends_count'])
-        print('-----------')
-    for i in range(len(arrays_of_ids)):
-        sql = ("INSERT INTO rt_info(id,name,location,friendsCount) VALUES('%d','%s','%s','%d')" % (arrays_of_ids[i],arrays_of_name[i],arrays_of_location[i],arrays_of_friends[i]))
-        cursor.execute(sql)
-        connection.commit()
-        # Fetch a single row using fetchone() method.
-    data = cursor.fetchall()
+        # print('-----------')
+        # print(user['user']['id'])
+        # print(user['user']['name'])
+        # print(user['user']['location'])
+        # print(user['user']['friends_count'])
+        # print('-----------')
 
-    write_to_file(filtered_users)
+def retweet_status(api, users):
+    result = []
+    for user in users:
+        print('fetching users retweet....' + str(user['status']['id']))
+        retweet_status = api.retweets(user['status']['id'], 100)
+        print('fetched users retweet....' + str(user['status']['id']))
+        print(retweet_status)
+        result.append(retweet_status)
+    return result
+
+def get_user_id(api, all_users):
+    users_info = []
+    for user in all_users:
+        try:
+            print('fetching info for user with id ' + str(user['user']['id']))
+            response = api.get_user(user['user']['id'])
+            if type(response) is tweepy.models.User:
+                users_info.append(response._json)
+                print('successfully fetched user with id ' + str(user['user']['id']))
+        except tweepy.error.TweepError:
+            pass
+    return users_info
+
 
 def convert_to_json(retweets):
     result = []
