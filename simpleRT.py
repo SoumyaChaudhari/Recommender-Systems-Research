@@ -90,11 +90,5 @@ def get_retweeters_info(retweeters):
         retweeters_info.append(retweeter['user'])
     return retweeters_info
 
-"""
- TODO:
-    -> Connect pymysql 
-    -> Create a database and a schema to structure the information you need in tables and rows to be saved
-    -> send the information to pymysql
-"""
 
 main()
